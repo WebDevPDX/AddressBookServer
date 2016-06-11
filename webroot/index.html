@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="AddressBookApp">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">    
+</head>
+<body>
+    <div class="container" ng-controller="addressBook">
+
+        <!-- OVERLAY - DELETE MODAL -->
+        <div class="overlay-modal" ng-show="deleteModalShown">
+            <div class="delete-warning">
+                <h2 class="delete-warning-heading">Are you sure you want to delete the selected contact</h2>
+                <button class="btn btn-lg btn-danger delete-button" ng-click="deleteDetails()">Yes! (Delete it)</button>
+                <button class="btn btn-lg btn-info keep-button" ng-click="deleteModalHide()">No! (Keep it)</button>
+            </div>
+        </div>
+
+        <div class="row content-row">
+            <div class="col-xs-3 name-list">
+                <ul class="list-unstyled">
+                    <a class="btn btn-default col-xs-12" ng-repeat="names in nameList" ng-click="getDetails(names.contactID); hideForm()" ng-class="isCurrentContact(names.contactID)">
+                        <li ng-class="checkNoName(names.givenName, names.surname)">{{names.givenName}} {{names.surname}}</li>
+                    </a>
+                    <a class="btn btn-default col-xs-12 new-entry-button" ng-show="formShown && !editMode">
+                        <span class="col-xs-10">{{contact.givenName}} {{contact.surname}}</span>
+                    </a>
+                    <a class="btn btn-default col-xs-12" ng-click="showForm()">
+                        <span class="col-xs-2"><img src="/images/add-record.png" alt="addition symbol"></span>
+                        <span class="col-xs-10">Add new contact</span>
+                    </a>
+                </ul>
+            </div>
+
+            <!-- body field -->
+            <div class="col-xs-9 content-div details-display" ng-show="!formShown && !editMode">
+                <a class="btn btn-small btn-info col-xs-1 pull-right" ng-click="editModeOn()">Edit</a>
+                <ul class="list-unstyled">
+                    <p class="col-xs-12">
+                        <span class="col-xs-3">Given Name:</span>
+                        <span class="col-xs-9">{{personDetail.givenName}}</span>
+                    </p>
+                    <p class="col-xs-12">
+                        <span class="col-xs-3">Last Name:</span>
+                        <span class="col-xs-9">{{personDetail.surname}}</span>
+                    </p>
+                    <p class="col-xs-12" ng-repeat="number in personPhone">
+                        <span class="col-xs-3">{{number.phoneType}}:</span>
+                        <span class="col-xs-9">{{number.phoneNumber}}</span>
+                    </p>
+                    <p class="col-xs-12" ng-repeat="address in personAddress">
+                        <span class="col-xs-3">{{address.addressType}}:</span>
+                        <span class="col-xs-9">{{address.street}}</span>
+                        <span class="col-xs-9 col-xs-offset-3">{{address.city}} {{address.state}} {{address.postalCode}}</span>
+                    </p>
+                </ul>
+            </div>
+            
+            <!-- EDIT ENTRY -->
+            <div class="col-xs-9 content-div" ng-show="!formShown && editMode">
+                <a class="btn btn-small btn-danger col-xs-1 pull-left"  ng-click="deleteModalShow()">Delete</a>
+                <a class="btn btn-small btn-info col-xs-1 pull-right"  ng-click="submitEntryUpdate()">Done</a>
+                <br>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <br>
+                        <label for="givenName" class="col-xs-2 col-xs-offset-2 control-label">Given name</label>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="givenName" ng-model="editDataObject.contact.givenName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname" class="col-xs-2 col-xs-offset-2 control-label">Surname</label>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="surname" ng-model="editDataObject.contact.surname">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-repeat="number in editDataObject.phones">
+                        <span class="col-xs-1 delete-btn" ng-click="removeEditPhone($index)"><img src="images/remove-record.png" alt="substraction symbol"></span>
+                        <select name="phoneType-{{$index}}" id="phoneType-{{$index}}" class="col-xs-3 control-label" class="form-control" ng-model="number.phoneType">
+                            <option>Home Phone</option>
+                            <option>Mobile Phone</option>
+                            <option>Work Phone</option>
+                            <option>Main Phone</option>
+                            <option>Other Phone</option>
+                        </select>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="phoneNumber-{{$index}}" ng-model="number.phoneNumber">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-4 col-xs-8">
+                            <button type="submit" class="btn btn-default"  ng-click="addEditPhone()"><img src="images/add-record.png" alt="addition symbol"> Add new phone</button>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-repeat="address in editDataObject.addresses">
+                        <span class="col-xs-1 delete-btn" ng-click="removeEditAddress($index)"><img src="images/remove-record.png" alt="substraction symbol"></span>
+                        <select name="addressType-{{$index}}" id="addressType-{{$index}}" class="col-xs-3 control-label" class="form-control" ng-model="address.addressType">
+                            <option>Home Address</option>
+                            <option>Mailing Address</option>
+                            <option>Work Address</option>
+                            <option>Other Address</option>
+                        </select>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control text-small" id="street-{{$index}}" ng-model="address.street">
+                            <br>
+                            <label for="street-{{$index}}" class="bottom-label">Street</label>
+                        </div>
+                        <div class="col-xs-4 col-xs-offset-4">
+                            <input type="text" class="form-control" id="city-{{$index}}" ng-model="address.city">
+                            <br>
+                            <label for="city-{{$index}}" class="bottom-label">City</label>
+                        </div>
+                        <div class="col-xs-2">
+                            <input type="text" class="form-control" id="state-{{$index}}" ng-model="address.state">
+                            <br>
+                            <label for="state-{{$index}}" class="bottom-label">State</label>
+                        </div>
+                        <div class="col-xs-2">
+                            <input type="text" class="form-control" id="postalCode-{{$index}}" ng-model="address.postalCode">
+                            <br>
+                            <label for="postalCode-{{$index}}" class="bottom-label">Postal Code</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-4 col-xs-8">
+                            <button type="submit" class="btn btn-default" ng-click="addEditAddress()"><img src="images/add-record.png" alt="addition symbol"> Add new address</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- NEW ENTRY -->
+            <div class="col-xs-9 content-div" ng-show="formShown && !editMode">
+                <a class="btn btn-small btn-info col-xs-1 pull-right" ng-click="submitNewContact()">Done</a>
+                <a class="btn btn-small btn-danger col-xs-1 pull-left" ng-click="hideForm()">Delete</a>
+                <br>
+                <form class="form-horizontal new-entry-field">
+                    <div class="form-group">
+                        <br>
+                        <label for="givenName" class="col-xs-3 col-xs-offset-1 control-label">Given name</label>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="givenName" ng-model="contact.givenName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname" class="col-xs-3 col-xs-offset-1 control-label">Surname</label>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="surname" ng-model="contact.surname">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-repeat="phone in phones">
+                        <a ng-click="removePhoneNewContact($index)"><span class="col-xs-1 delete-btn"><img src="images/remove-record.png" alt="substraction symbol"></span></a>
+                        <select name="phoneType" id="phoneType" class="col-xs-3 control-label" class="form-control" ng-model="phone.phoneType">
+                            <option>Home Phone</option>
+                            <option>Mobile Phone</option>
+                            <option>Work Phone</option>
+                            <option>Main Phone</option>
+                            <option>Other Phone</option>
+                        </select>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control" id="phoneNumber" placeholder="Phone Number" ng-model="phone.phoneNumber">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-4 col-xs-10">
+                            <button type="submit" class="btn btn-default"  ng-click="addPhoneNewContact()"><img src="images/add-record.png" alt="addition symbol"> Add new phone</button>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-repeat="address in addresses">
+                        <a ng-click="removeAddressNewContact($index)"><span class="col-xs-1 delete-btn"><img src="images/remove-record.png" alt="substraction symbol"></span></a>
+                        <select name="addressType" id="addressType" class="col-xs-3 control-label" class="form-control" ng-model="address.addressType">
+                            <option>Home Address</option>
+                            <option>Mailing Address</option>
+                            <option>Work Address</option>
+                            <option>Other Address</option>
+                        </select>
+                        <div class="col-xs-8">
+                            <input type="text" class="form-control text-small" id="street" ng-model="address.street">
+                            <br>
+                            <label for="street" class="bottom-label">Street</label>
+                        </div>
+                        <div class="col-xs-4 col-xs-offset-4">
+                            <input type="text" class="form-control" id="city" ng-model="address.city">
+                            <br>
+                            <label for="city" class="bottom-label">City</label>
+                        </div>
+                        <div class="col-xs-2">
+                            <input type="text" class="form-control" id="state" ng-model="address.state">
+                            <br>
+                            <label for="state" class="bottom-label">State</label>
+                        </div>
+                        <div class="col-xs-2">
+                            <input type="text" class="form-control" id="postalCode" ng-model="address.postalCode">
+                            <br>
+                            <label for="postalCode" class="bottom-label">Postal Code</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-offset-4 col-xs-10">
+                            <button type="submit" class="btn btn-default" ng-click="addAddressNewContact()"><img src="images/add-record.png" alt="addition symbol"> Add new address</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
