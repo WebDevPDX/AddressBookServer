@@ -268,7 +268,8 @@ var data = [
     }
 ];
 
-const PORT=18080;
+const PORT = process.env.PORT || 3000;
+//const PORT=18080;
 
 function handleRequest(request, response) {
     try {
