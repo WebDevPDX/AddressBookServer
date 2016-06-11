@@ -1,0 +1,33 @@
+{
+  "name": "addressbook",
+  "version": "0.9.0",
+  "description": "Projecct built as solution to a task given during Front End Development position interview process",
+  "main": "AddressBookServer.js",
+  "dependencies": {
+    "mime": "^1.3.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node AddressBookServer.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebDevPDX/AddressBookServer.git"
+  },
+  "keywords": [
+    "HTML",
+    "CSS",
+    "Javascript",
+    "Angular",
+    "Underscore",
+    "JSON",
+    "Ajax"
+  ],
+  "author": "Falk Schwiefert",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WebDevPDX/AddressBookServer/issues"
+  },
+  "homepage": "https://github.com/WebDevPDX/AddressBookServer#readme"
+}
